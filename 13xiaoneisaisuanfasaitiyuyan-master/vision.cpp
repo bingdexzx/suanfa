@@ -69,22 +69,34 @@ Rect detectRedRing(const Mat& frame)
     // TODO 4：选择合适的目标
     // 提示：contourArea()、boundingRect()
     for(int cnt =0 ; cnt < contours.size(); cnt++ ){
+        //filt out small ex_contours 
         if (contourArea(contours[cnt]) < 100){
             cntRejected++;
              continue; 
         }
+        //find the ex_contour
         if(hierarchy[cnt][3] == -1 ){
-
+            //find the in_contour in ex_tour
             if(hierarchy[cnt][2] != -1){
-                
-                exArea = contourArea(contours[cnt]);
-                inArea = contourArea(contours[hierarchy[cnt][2]]);
-                if (0.8 < inArea/exArea <1.2 ){
-                    cntAccepted++;
-                    targetBox = boundingRect(contours[cnt]);
-                }else{
-                    cntRejected++;
-                    continue;
+                int next = hierarchy[cnt][2];
+                while(next != -1){
+                    if(contourArea(contours[next]) < 100){
+                        next = hierarchy[next][2];
+                        continue;
+                    }else{
+                        exArea = contourArea(contours[cnt]);
+                        inArea = contourArea(contours[next]);
+                        double ratio = inArea/exArea;
+                        if(ratio < 1 && ratio > 0.6){
+                            targetBox = boundingRect(contours[cnt]);
+                            cntAccepted++;
+                            break;
+                        }else{
+                            next = hierarchy[next][2];
+                            continue;
+                        }
+                    }
+
                 }
 
             }else{
