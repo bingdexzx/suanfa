@@ -1,0 +1,3 @@
+/home/tromac-test/suanfa/13xiaoneisaisuanfasaitiyuyan-master/build/CMakeFiles/vision.dir
+/home/tromac-test/suanfa/13xiaoneisaisuanfasaitiyuyan-master/build/CMakeFiles/edit_cache.dir
+/home/tromac-test/suanfa/13xiaoneisaisuanfasaitiyuyan-master/build/CMakeFiles/rebuild_cache.dir

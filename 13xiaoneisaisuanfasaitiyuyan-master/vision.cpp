@@ -12,14 +12,26 @@ using namespace std;
 // 如果没有找到目标，返回空矩形
 // ===============================
 
+double exArea = 0;
+double inArea = 0;
+
+int cntRejected = 0;
+int cntAccepted = 0;
+
+Mat kernel = getStructuringElement(MORPH_ELLIPSE,Size(5,5));
+
+Scalar red_ranges_low[2] = {Scalar(0,90,70),Scalar(10,255,255)};
+Scalar red_ranges_high[2] = {Scalar(160,150,100),Scalar(179,255,255)};
+
 Rect detectRedRing(const Mat& frame)
 {
     Rect targetBox;
 
     Mat hsv, mask0,mask1,mask2;
 
-    Scalar red_ranges_low[2] = {Scalar(0,90,70),Scalar(10,255,255)};
-    Scalar red_ranges_high[2] = {Scalar(160,150,100),Scalar(179,255,255)};
+    vector<vector<Point>> contours;
+    vector<Vec4i> hierarchy;
+
 
     // BGR to HSV
     cvtColor(frame, hsv, COLOR_BGR2HSV);
@@ -47,16 +59,46 @@ Rect detectRedRing(const Mat& frame)
 
     // TODO 2：去除噪声（选做）
     // 提示：morphologyEx()
-    Mat kernel = getStructuringElement(MORPH_ELLIPSE)
-    morphologyEx(mask,mask,MORPH_CLOSE)
+    morphologyEx(mask0,mask0,MORPH_CLOSE,kernel);
+    morphologyEx(mask0,mask0,MORPH_OPEN,kernel);
     
 
     // TODO 3：寻找轮廓
     // 提示：findContours()
-
-
+    findContours(mask0.clone(),contours,hierarchy,RETR_CCOMP,CHAIN_APPROX_SIMPLE);
     // TODO 4：选择合适的目标
     // 提示：contourArea()、boundingRect()
+    for(int cnt =0 ; cnt < contours.size(); cnt++ ){
+        if (contourArea(contours[cnt]) < 100){
+            cntRejected++;
+             continue; 
+        }
+        if(hierarchy[cnt][3] == -1 ){
+
+            if(hierarchy[cnt][2] != -1){
+                
+                exArea = contourArea(contours[cnt]);
+                inArea = contourArea(contours[hierarchy[cnt][2]]);
+                if (0.8 < inArea/exArea <1.2 ){
+                    cntAccepted++;
+                    targetBox = boundingRect(contours[cnt]);
+                }else{
+                    cntRejected++;
+                    continue;
+                }
+
+            }else{
+                cntRejected++;
+                continue;
+            }
+            
+           
+            
+        }
+
+    }
+
+
 
 
     return targetBox;
@@ -89,7 +131,7 @@ int main(int argc, char** argv)
                       Scalar(0, 255, 0), 2);
         }
 
-        imshow("Result", frame);
+        cv::imshow("Result", frame);
 
         // 按 ESC 退出
         int key = waitKey(33);
