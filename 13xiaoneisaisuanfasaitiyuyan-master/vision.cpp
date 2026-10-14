@@ -81,7 +81,7 @@ Rect detectRedRing(const Mat& frame)
                 int next = hierarchy[cnt][2];
                 while(next != -1){
                     if(contourArea(contours[next]) < 100){
-                        next = hierarchy[next][2];
+                        next = hierarchy[next][0];
                         continue;
                     }else{
                         exArea = contourArea(contours[cnt]);
