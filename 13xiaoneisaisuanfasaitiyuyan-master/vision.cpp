@@ -92,7 +92,7 @@ Rect detectRedRing(const Mat& frame)
                             cntAccepted++;
                             break;
                         }else{
-                            next = hierarchy[next][2];
+                            next = hierarchy[next][0];
                             continue;
                         }
                     }
