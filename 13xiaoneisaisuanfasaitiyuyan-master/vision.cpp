@@ -74,12 +74,13 @@ Rect detectRedRing(const Mat& frame)
         if(hierarchy[cnt][3] != -1 ){
             continue;
         }
-            //find the in_contour in ex_tour
+        //find the in_contours in ex_contour
         if(hierarchy[cnt][2] == -1){
             continue;
         }
         int next = hierarchy[cnt][2];
         double inAera = 0;
+        // get the biggest in_contour
         while(next != -1){
             if(contourArea(contours[next]) < 90){
                 next = hierarchy[next][0];
@@ -91,7 +92,7 @@ Rect detectRedRing(const Mat& frame)
             }
             next = hierarchy[next][0];
         }
-
+        // max in_contour area too small -> fuck off
         if(inAera < 90){
             continue;
         }
