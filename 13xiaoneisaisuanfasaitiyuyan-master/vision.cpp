@@ -92,7 +92,7 @@ Rect detectRedRing(const Mat& frame)
             }
             next = hierarchy[next][0];
         }
-        // max in_contour area too small -> fuck off
+        // max in_contour area too small -> GET OUT
         if(inAera < 90){
             continue;
         }
