@@ -12,16 +12,12 @@ using namespace std;
 // 如果没有找到目标，返回空矩形
 // ===============================
 
-double exArea = 0;
-double inArea = 0;
 
-int cntRejected = 0;
-int cntAccepted = 0;
 
 Mat kernel = getStructuringElement(MORPH_ELLIPSE,Size(5,5));
 
-Scalar red_ranges_low[2] = {Scalar(0,90,70),Scalar(10,255,255)};
-Scalar red_ranges_high[2] = {Scalar(160,150,100),Scalar(179,255,255)};
+Scalar red_ranges_low[2] = {Scalar(0,130,137),Scalar(10,255,255)};
+Scalar red_ranges_high[2] = {Scalar(169,150,137),Scalar(179,255,255)};
 
 Rect detectRedRing(const Mat& frame)
 {
@@ -55,13 +51,13 @@ Rect detectRedRing(const Mat& frame)
     );
 
     bitwise_or(mask1,mask2,mask0);
-
+    //cv::imshow("mask0",mask0);
 
     // TODO 2：去除噪声（选做）
     // 提示：morphologyEx()
     morphologyEx(mask0,mask0,MORPH_CLOSE,kernel);
     morphologyEx(mask0,mask0,MORPH_OPEN,kernel);
-    
+    cv::imshow("mask0",mask0);
 
     // TODO 3：寻找轮廓
     // 提示：findContours()
@@ -70,43 +66,40 @@ Rect detectRedRing(const Mat& frame)
     // 提示：contourArea()、boundingRect()
     for(int cnt =0 ; cnt < contours.size(); cnt++ ){
         //filt out small ex_contours 
-        if (contourArea(contours[cnt]) < 100){
-            cntRejected++;
+        if (contourArea(contours[cnt]) < 90){
+           
              continue; 
         }
         //find the ex_contour
-        if(hierarchy[cnt][3] == -1 ){
+        if(hierarchy[cnt][3] != -1 ){
+            continue;
+        }
             //find the in_contour in ex_tour
-            if(hierarchy[cnt][2] != -1){
-                int next = hierarchy[cnt][2];
-                while(next != -1){
-                    if(contourArea(contours[next]) < 100){
-                        next = hierarchy[next][0];
-                        continue;
-                    }else{
-                        exArea = contourArea(contours[cnt]);
-                        inArea = contourArea(contours[next]);
-                        double ratio = inArea/exArea;
-                        if(ratio < 1 && ratio > 0.6){
-                            targetBox = boundingRect(contours[cnt]);
-                            cntAccepted++;
-                            break;
-                        }else{
-                            next = hierarchy[next][0];
-                            continue;
-                        }
-                    }
-
-                }
-
-            }else{
-                cntRejected++;
+        if(hierarchy[cnt][2] == -1){
+            continue;
+        }
+        int next = hierarchy[cnt][2];
+        double inAera = 0;
+        while(next != -1){
+            if(contourArea(contours[next]) < 90){
+                next = hierarchy[next][0];
                 continue;
             }
-            
-           
-            
+            if(contourArea(contours[next]) > inAera){
+                inAera = contourArea(contours[next]);
+        
+            }
+            next = hierarchy[next][0];
         }
+
+        if(inAera < 90){
+            continue;
+        }
+
+
+        targetBox = boundingRect(contours[cnt]);
+        
+
 
     }
 
@@ -152,7 +145,7 @@ int main(int argc, char** argv)
     }
 
     cap.release();
-    destroyAllWindows();
+    cv::destroyAllWindows();
 
     return 0;
 }
