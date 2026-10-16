@@ -99,6 +99,20 @@ Rect detectRedRing(const Mat& frame)
         if(inAera < 100){
             continue;
         }
+
+        // 计算外框圆度
+        double peri = arcLength(contours[cnt], true);
+        double area = contourArea(contours[cnt]);
+        if (peri <= 1e-6) continue;
+        double circularity = 4.0 * CV_PI * area / (peri * peri);
+        if (circularity < 0.75 || circularity > 1.3) continue;
+
+        // 计算内框圆度
+        double inPeri = arcLength(contours[in_cnt], true);
+        if (inPeri <= 1e-6) continue;
+        double inCircularity = 4.0 * CV_PI * inAera / (inPeri * inPeri);
+        if (inCircularity < 0.75 || inCircularity > 1.3) continue;
+
         //inCounter not a circle
         if (cv::matchShapes(contours[cnt],contours[in_cnt],CONTOURS_MATCH_I1,0)>0.1)
         {
