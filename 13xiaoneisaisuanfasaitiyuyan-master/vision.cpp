@@ -80,6 +80,7 @@ Rect detectRedRing(const Mat& frame)
         }
         int next = hierarchy[cnt][2];
         double inAera = 0;
+        int in_cnt=-1;
         // get the biggest in_contour
         while(next != -1){
             if(contourArea(contours[next]) < 90){
@@ -88,19 +89,28 @@ Rect detectRedRing(const Mat& frame)
             }
             if(contourArea(contours[next]) > inAera){
                 inAera = contourArea(contours[next]);
+                in_cnt = next;
         
             }
             next = hierarchy[next][0];
         }
         // max in_contour area too small -> GET OUT
-        if(inAera < 90){
+        if(inAera < 100){
             continue;
         }
-
-
+        //inCounter not a circle
+        if (cv::matchShapes(contour(cnt),contour(in_cnt),CONTOURS_MATCH_I1,0)>0.01)
+        {
+            continue;
+        }
+        
         targetBox = boundingRect(contours[cnt]);
         
-
+        //not a right circle 
+        double rate =targetBox.wight/targetBox.height;
+        if(rate>1.2 || rate <0.8){
+            continue;
+        }
 
     }
 
@@ -109,6 +119,9 @@ Rect detectRedRing(const Mat& frame)
 
     return targetBox;
 }
+
+
+
 
 
 int main(int argc, char** argv)
