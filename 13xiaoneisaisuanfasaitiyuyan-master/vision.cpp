@@ -1,6 +1,7 @@
 
 #include <opencv2/opencv.hpp>
 #include <iostream>
+#include <cmath>
 
 using namespace cv;
 using namespace std;
@@ -103,7 +104,27 @@ Rect detectRedRing(const Mat& frame)
         {
             continue;
         }
-        
+
+        // 内外圆心是否重合
+        Point2f oc, ic;
+        float orad = 0, irad = 0;
+        minEnclosingCircle(contours[cnt],    oc, orad);
+        minEnclosingCircle(contours[in_cnt], ic, irad);
+        if (orad <= 1e-6) {
+            continue;
+        }
+        double dx = oc.x - ic.x, dy = oc.y - ic.y;
+        double offset = std::sqrt(dx * dx + dy * dy) / orad;   //计算圆心偏移距离与外半径的比值
+        if (offset > 0.15) {
+            continue;
+        }
+
+        // 环的粗细：内半径相对外半径
+        double rRatio = (double)irad / orad;
+        if (rRatio < 0.2 || rRatio > 0.9) {
+            continue;
+        }
+
         Rect Box = boundingRect(contours[cnt]);
         
         //not a right circle 
