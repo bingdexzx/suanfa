@@ -99,23 +99,24 @@ Rect detectRedRing(const Mat& frame)
             continue;
         }
         //inCounter not a circle
-        if (cv::matchShapes(contour(cnt),contour(in_cnt),CONTOURS_MATCH_I1,0)>0.01)
+        if (cv::matchShapes(contours[cnt],contours[in_cnt],CONTOURS_MATCH_I1,0)>0.1)
         {
             continue;
         }
         
-        targetBox = boundingRect(contours[cnt]);
+        Rect Box = boundingRect(contours[cnt]);
         
         //not a right circle 
-        double rate =targetBox.wight/targetBox.height;
-        if(rate>1.2 || rate <0.8){
+        if (Box.height == 0) {
             continue;
         }
-
+        double rate = (double) Box.width/Box.height;
+        if(rate>1.2 || rate <0.8) {
+            continue;
+        }
+        targetBox = Box;
+        break;
     }
-
-
-
 
     return targetBox;
 }
