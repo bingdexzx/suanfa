@@ -100,16 +100,16 @@ Rect detectRedRing(const Mat& frame)
             continue;
         }
 
-        // 计算外框圆度
+        // cala ex_contour circularity
         double peri = arcLength(contours[cnt], true);
         double area = contourArea(contours[cnt]);
-        if (peri <= 1e-6) continue;
+        //if (peri <= 1e-6) continue;
         double circularity = 4.0 * CV_PI * area / (peri * peri);
         if (circularity < 0.75 || circularity > 1.3) continue;
 
-        // 计算内框圆度
+        // Cala in_contour circularity
         double inPeri = arcLength(contours[in_cnt], true);
-        if (inPeri <= 1e-6) continue;
+        //if (inPeri <= 1e-6) continue;
         double inCircularity = 4.0 * CV_PI * inAera / (inPeri * inPeri);
         if (inCircularity < 0.75 || inCircularity > 1.3) continue;
 
@@ -119,7 +119,7 @@ Rect detectRedRing(const Mat& frame)
             continue;
         }
 
-        // 内外圆心是否重合
+        // cala the offset of the two circles
         Point2f oc, ic;
         float orad = 0, irad = 0;
         minEnclosingCircle(contours[cnt],    oc, orad);
@@ -128,12 +128,12 @@ Rect detectRedRing(const Mat& frame)
             continue;
         }
         double dx = oc.x - ic.x, dy = oc.y - ic.y;
-        double offset = std::sqrt(dx * dx + dy * dy) / orad;   //计算圆心偏移距离与外半径的比值
+        double offset = std::sqrt(dx * dx + dy * dy) / orad;   //if offset > 0.15 -> getout
         if (offset > 0.15) {
             continue;
         }
 
-        // 环的粗细：内半径相对外半径
+        // file too thin or too thick ring
         double rRatio = (double)irad / orad;
         if (rRatio < 0.2 || rRatio > 0.9) {
             continue;
@@ -141,16 +141,12 @@ Rect detectRedRing(const Mat& frame)
 
         Rect Box = boundingRect(contours[cnt]);
         
-        //not a right circle 
-        if (Box.height == 0) {
-            continue;
-        }
+        //filt rectangle && ellipse 
         double rate = (double) Box.width/Box.height;
         if(rate>1.2 || rate <0.8) {
             continue;
         }
         targetBox = Box;
-        break;
     }
 
     return targetBox;
