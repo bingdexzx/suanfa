@@ -15,10 +15,10 @@ using namespace std;
 
 
 
-Mat kernel = getStructuringElement(MORPH_ELLIPSE,Size(5,5));
+Mat kernel = getStructuringElement(MORPH_ELLIPSE,Size(3,3));
 
-Scalar red_ranges_low[2] = {Scalar(0,130,137),Scalar(10,255,255)};
-Scalar red_ranges_high[2] = {Scalar(169,150,137),Scalar(179,255,255)};
+Scalar red_ranges_low[2] = {Scalar(0,130,137),Scalar(11,255,255)};
+Scalar red_ranges_high[2] = {Scalar(168,130,137),Scalar(179,255,255)};
 
 Rect detectRedRing(const Mat& frame)
 {
@@ -67,7 +67,7 @@ Rect detectRedRing(const Mat& frame)
     // 提示：contourArea()、boundingRect()
     for(int cnt =0 ; cnt < contours.size(); cnt++ ){
         //filt out small ex_contours 
-        if (contourArea(contours[cnt]) < 90){
+        if (contourArea(contours[cnt]) < 80){
            
              continue; 
         }
@@ -96,25 +96,26 @@ Rect detectRedRing(const Mat& frame)
             next = hierarchy[next][0];
         }
         // max in_contour area too small -> GET OUT
-        if(inAera < 100){
+        if(inAera < 80){
             continue;
         }
 
         // cala ex_contour circularity
-        double peri = arcLength(contours[cnt], true);
-        double area = contourArea(contours[cnt]);
-        //if (peri <= 1e-6) continue;
-        double circularity = 4.0 * CV_PI * area / (peri * peri);
-        if (circularity < 0.75 || circularity > 1.3) continue;
+        double experi = arcLength(contours[cnt], true);
+        double exArea = contourArea(contours[cnt]);
+        if (experi <= 1e-6) continue;
+        double circularity = 4.0 * CV_PI * exArea / (experi * experi);
+        if (circularity < 0.85 || circularity > 1.18) continue;
 
         // Cala in_contour circularity
         double inPeri = arcLength(contours[in_cnt], true);
-        //if (inPeri <= 1e-6) continue;
+        if (inPeri <= 1e-6) continue;
         double inCircularity = 4.0 * CV_PI * inAera / (inPeri * inPeri);
-        if (inCircularity < 0.75 || inCircularity > 1.3) continue;
+        if (inCircularity < 0.85 || inCircularity > 1.18) continue;
+
 
         //inCounter not a circle
-        if (cv::matchShapes(contours[cnt],contours[in_cnt],CONTOURS_MATCH_I1,0)>0.1)
+        if (cv::matchShapes(contours[cnt],contours[in_cnt],CONTOURS_MATCH_I1,0)>0.2)
         {
             continue;
         }
@@ -129,15 +130,15 @@ Rect detectRedRing(const Mat& frame)
         }
         double dx = oc.x - ic.x, dy = oc.y - ic.y;
         double offset = std::sqrt(dx * dx + dy * dy) / orad;   //if offset > 0.15 -> getout
-        if (offset > 0.15) {
+        if (offset > 0.2) {
             continue;
         }
 
         // file too thin or too thick ring
-        double rRatio = (double)irad / orad;
-        if (rRatio < 0.2 || rRatio > 0.9) {
-            continue;
-        }
+        //double rRatio = (double)irad / orad;
+        //if (rRatio < 0.2 || rRatio > 0.9) {
+        //    continue;
+        //}
 
         Rect Box = boundingRect(contours[cnt]);
         
