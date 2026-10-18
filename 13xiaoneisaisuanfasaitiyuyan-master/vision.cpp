@@ -20,9 +20,9 @@ Mat kernel = getStructuringElement(MORPH_ELLIPSE,Size(3,3));
 Scalar red_ranges_low[2] = {Scalar(0,130,137),Scalar(11,255,255)};
 Scalar red_ranges_high[2] = {Scalar(168,130,137),Scalar(179,255,255)};
 
-Rect detectRedRing(const Mat& frame)
+vector<Rect> detectRedRing(const Mat& frame)
 {
-    Rect targetBox;
+    vector<Rect> targetBoxs;
 
     Mat hsv, mask0,mask1,mask2;
 
@@ -147,10 +147,10 @@ Rect detectRedRing(const Mat& frame)
         if(rate>1.2 || rate <0.8) {
             continue;
         }
-        targetBox = Box;
+        targetBoxs.push_back(Box);
     }
 
-    return targetBox;
+    return targetBoxs;
 }
 
 
@@ -174,14 +174,14 @@ int main(int argc, char** argv)
     while (cap.read(frame))
     {
         // 调用自己的检测算法
-        Rect box = detectRedRing(frame);
+        for (auto box : detectRedRing(frame)) {
+                 // 检测到目标就画框
 
-        // 检测到目标就画框
-        if (box.area() > 0)
-        {
-            rectangle(frame, box,
-                      Scalar(0, 255, 0), 2);
-        }
+            if (box.area() > 0){
+                rectangle(frame, box,Scalar(0, 255, 0), 2);
+            }
+        };
+
 
         cv::imshow("Result", frame);
 
