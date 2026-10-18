@@ -135,10 +135,10 @@ vector<Rect> detectRedRing(const Mat& frame)
         }
 
         // file too thin or too thick ring
-        //double rRatio = (double)irad / orad;
-        //if (rRatio < 0.2 || rRatio > 0.9) {
-        //    continue;
-        //}
+        double rRatio = (double)irad / orad;
+        if (rRatio < 0.6 || rRatio > 0.9) {
+           continue;
+        }
 
         Rect Box = boundingRect(contours[cnt]);
         
